@@ -12,12 +12,12 @@ def get_args(*in_args):
     parser = argparse.ArgumentParser()
 
     # === Required parameters === #
-    parser.add_argument("data_file", default=MNLI_PATH, required=True,
+    parser.add_argument("--data_file", default=MNLI_PATH, required=True,
                         type=str, help="tsv to convert")
-    parser.add_argument("output_file", required=True, type=str,
+    parser.add_argument("--output_file", required=True, type=str,
                         help="Where to store the resulting csv")
-    parser.add_argument("task", required=True, type=Task, help="The task name")
-    parser.add_argument("predict_premise", action='store_true',
+    parser.add_argument("--task", required=True, type=Task, help="The task name")
+    parser.add_argument("--predict_premise", action='store_true',
                         help="Whether to predict the premise or the question")
     args = parser.parse_args(*in_args)
     return args
