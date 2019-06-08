@@ -2,6 +2,7 @@ import pandas as pd
 import argparse
 from enum import Enum
 
+
 class Task(Enum):
     MNLI = "mnli"
     RTE = "rte"
@@ -11,6 +12,7 @@ class Task(Enum):
 
 
 MNLI_PATH = "/scratch/tjf324/data/glue_auto_dl/MNLI/train.tsv"
+
 
 def get_args(*in_args):
     parser = argparse.ArgumentParser()
@@ -34,30 +36,30 @@ def convert_task(data: pd.DataFrame, task: Task, predict_premise: bool) -> pd.Se
         if predict_premise:
             first_part = data['sentence2']
             second_part = data['sentence1']
-        data['sentences'] = first_part + ' | ' + second_part  + " || " + data["gold_label"]
+        data['sentences'] = first_part + ' | ' + second_part + " || " + data["gold_label"]
     elif task == Task.RTE:
         first_part = data['sentence1']
         second_part = data['sentence2']
         if predict_premise:
             first_part = data['sentence2']
             second_part = data['sentence1']
-        data['sentences'] = first_part + ' | ' + second_part  + " || " + data["label"]
+        data['sentences'] = first_part + ' | ' + second_part + " || " + data["label"]
     elif task == Task.COLA:
         if predict_premise:
             print('`predict_premise` does not apply to CoLA')
-        return data.iloc[:, -1] + ' | ' + data.iloc[:, 1]
+        return data.iloc[:, -1] + ' | ' + data.iloc[:, 1].astype(str)
     elif task == Task.WIC:
         if predict_premise:
             print('`predict_premise` does not apply to WiC (tasks are interchangeable)')
             print("This does not handle position yet.")
         first_part = data['sentence1']
         second_part = data['sentence2']
-        data['sentences'] = first_part + ' | ' + second_part  + " || " + data["label"]
+        data['sentences'] = first_part + ' | ' + second_part + " || " + data["label"]
     elif task == Task.WSC:
         if predict_premise:
             print('`predict_premise` does not apply to WSC')
             print("This does not handle position yet.")
-        data['sentences'] = data["text"] + ' | ' data["label"]
+        data['sentences'] = data["text"] + ' | ' + data["label"]
     return data["sentences"]
 
 
@@ -73,5 +75,3 @@ if __name__ == "__main__":
     output_series = convert_task(data, args.task, args.predict_premise)
     print("Writing...")
     output_series.to_csv(args.output_file, sep="\t", index=False, header=False)
-
-
