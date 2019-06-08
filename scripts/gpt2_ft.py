@@ -35,6 +35,12 @@ def get_args(*in_args):
         help="The maximum length of the samples",
     )
     parser.add_argument(
+        "--run_name",
+        default="",
+        type=str,
+        help="The name of the run",
+    )
+    parser.add_argument(
         "--batch_size",
         default=80,
         type=int,
@@ -67,10 +73,13 @@ def main():
     args = get_args()
     sess = gpt2.start_tf_sess()
     input_file = args.input_file
-    LOGGER.info(f"Starting finetuning on {input_file}")
+    run_name = args.run_name
+    LOGGER.info("Starting finetuning on %s", input_file)
+    LOGGER.info("Run name: %s", run_name)
     gpt2.finetune(
         sess,
         input_file,
+        run_name=run_name,
         model_name=args.model_name,
         learning_rate=args.learning_rate,
         save_every=args.save_every,
