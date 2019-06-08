@@ -18,7 +18,7 @@ def get_args(*in_args):
     # === Required parameters === #
     parser.add_argument(
         "--run_name",
-        default=None,
+        default="run1",
         type=str,
         help="Run name to use for training",
     )
@@ -35,14 +35,8 @@ def get_args(*in_args):
         help="The maximum length of the samples",
     )
     parser.add_argument(
-        "--run_name",
-        default="",
-        type=str,
-        help="The name of the run",
-    )
-    parser.add_argument(
         "--batch_size",
-        default=80,
+        default=3,
         type=int,
         help="The batch size to use while generating",
     )
