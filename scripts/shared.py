@@ -17,5 +17,6 @@ class Task(Enum):
     MNLI = "mnli"
     RTE = "rte"
     COLA = "cola"
+    COPA = "copa"
     WIC = "wic"
     WSC = "wsc"
