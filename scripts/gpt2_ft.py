@@ -82,7 +82,7 @@ def main():
         steps=args.steps,
     )
     LOGGER.info("Final model samples")
-    gpt2.generate(sess)
+    gpt2.generate(sess, run_name=run_name)
 
 
 if __name__ == "__main__":

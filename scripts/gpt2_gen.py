@@ -97,17 +97,15 @@ def main() -> None:
         n_samples = batch_size * (n_samples // batch_size)
 
     sess = gpt2.start_tf_sess()
-    if args.run_name:
-        gpt2.load_gpt2(sess, args.run_name)
-    else:
-        gpt2.load_gpt2(sess)
+    run_name = args.run_name
+    gpt2.load_gpt2(sess, args.run_name)
     example = ""
     if args.example:
         example = args.example + Separators.SENT_SEP
     LOGGER.info("Generating samples...")
     samples = gpt2.generate(sess, return_as_list=True,
                             truncate=Separators.EOS, prefix=Separators.BOS + example,
-                            nsamples=n_samples, batch_size=batch_size,
+                            nsamples=n_samples, batch_size=batch_size, run_name=run_name,
                             length=args.length)
     samples = filter_bad_samples(samples, args.task)
     samples = [s.replace(Separators.BOS, "").replace("\n", " ").replace("\t", " ") for s in samples]
