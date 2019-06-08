@@ -47,7 +47,9 @@ def convert_task(data: pd.DataFrame, task: Task, predict_premise: bool) -> pd.Se
     elif task == Task.COPA:
         if predict_premise:
             print("`predict_premise` is not supported for COPA")
-        data['sentences'] = data['premise'] + Separators.SENT_SEP + data['choice1'] + Separators.SENT_SEP + data['choice2'] + Separators.LABEL_SEP + data["label"]
+        data['sentences'] = data['premise'] + Separators.SENT_SEP + data['choice1'] + \
+                            Separators.SENT_SEP + data['choice2'] + Separators.LABEL_SEP + \
+                            data["label"].astype(str)
     elif task == Task.WSC:
         if predict_premise:
             print('`predict_premise` does not apply to WSC')
