@@ -99,6 +99,7 @@ def main() -> None:
                             nsamples=n_samples, batch_size=batch_size,
                             length=args.length)
     samples = filter_bad_samples(samples)
+    samples = [s.replace(Separators.BOS, "") for s in samples]
     LOGGER.info("Generated %s splittable samples", len(samples))
     LOGGER.info("Preview:")
     for i in samples[:10]:
