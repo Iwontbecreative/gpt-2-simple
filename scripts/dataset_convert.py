@@ -1,6 +1,7 @@
 import pandas as pd
 import argparse
 from enum import Enum
+from scripts.shared import Separators
 
 
 class Task(Enum):
@@ -36,30 +37,30 @@ def convert_task(data: pd.DataFrame, task: Task, predict_premise: bool) -> pd.Se
         if predict_premise:
             first_part = data['sentence2']
             second_part = data['sentence1']
-        data['sentences'] = first_part + ' | ' + second_part + " || " + data["gold_label"]
+        data['sentences'] = first_part + Separators.SENT_SEP + second_part + Separators.LABEL_SEP + data["gold_label"]
     elif task == Task.RTE:
         first_part = data['sentence1']
         second_part = data['sentence2']
         if predict_premise:
             first_part = data['sentence2']
             second_part = data['sentence1']
-        data['sentences'] = first_part + ' | ' + second_part + " || " + data["label"]
+        data['sentences'] = first_part + Separators.SENT_SEP + second_part + Separators.LABEL_SEP + data["label"]
     elif task == Task.COLA:
         if predict_premise:
             print('`predict_premise` does not apply to CoLA')
-        return data.iloc[:, -1] + ' | ' + data.iloc[:, 1].astype(str)
+        return data.iloc[:, -1] + Separators.LABEL_SEP + data.iloc[:, 1].astype(str)
     elif task == Task.WIC:
         if predict_premise:
             print('`predict_premise` does not apply to WiC (tasks are interchangeable)')
             print("This does not handle position yet.")
         first_part = data['sentence1']
         second_part = data['sentence2']
-        data['sentences'] = first_part + ' | ' + second_part + " || " + data["label"]
+        data['sentences'] = first_part + Separators.SENT_SEP + second_part + Separators.LABEL_SEP + data["label"]
     elif task == Task.WSC:
         if predict_premise:
             print('`predict_premise` does not apply to WSC')
             print("This does not handle position yet.")
-        data['sentences'] = data["text"] + ' | ' + data["label"]
+        data['sentences'] = data["text"] + Separators.LABEL_SEP + data["label"]
     return data["sentences"]
 
 
