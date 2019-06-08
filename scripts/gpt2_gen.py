@@ -44,6 +44,10 @@ def filter_bad_samples(samples: List[str]) -> List[str]:
     return samples
 
 
+def remove_delimiter_artefacts(s: str) -> str:
+    return str(s).split("<")[0]
+
+
 def convert_to_tsv(samples: List[str]) -> pd.DataFrame:
     #FIXME: Check labels are in allowed values?
     split_samples = []
@@ -74,7 +78,10 @@ def convert_to_tsv(samples: List[str]) -> pd.DataFrame:
         else:
             raise TypeError(f'No separators found in sample {s}')
         split_samples.append(sample_dict)
-    return pd.DataFrame(split_samples)
+    df = pd.DataFrame(split_samples)
+    # Remove some artefacts, not all sadly...
+    df['label'] = df['label'].apply(remove_delimiter_artefacts)
+    return df
 
 
 def main() -> None:
@@ -105,6 +112,7 @@ def main() -> None:
     for i in samples[:10]:
         LOGGER.info(i + "\n")
     samples_df = convert_to_tsv(samples)
+    LOGGER.info("After additional checks, generated %s samples", len(samples_df))
     output_file = args.output_file
     LOGGER.info(f"Writing samples to %s", output_file)
     samples_df.to_csv(output_file, sep="\t", index=False)

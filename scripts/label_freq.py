@@ -16,7 +16,7 @@ def main():
     args = get_args()
     folder = args.input_folder
 
-    for fn in glob.glob(folder + "*.tsv"):
+    for fn in glob.glob(folder + "/*.tsv"):
         print(f"Handling {fn}")
         data = pd.read_csv(fn, sep="\t")
         if "gold_label" in data.columns:
@@ -26,5 +26,5 @@ def main():
         else:
             print(f"Could not find label column for {fn}")
 
-if __name__ == "__main__"
+if __name__ == "__main__":
     main()
