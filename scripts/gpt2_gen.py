@@ -21,8 +21,8 @@ def get_args(*in_args):
     parser.add_argument("--n_samples", default=1000, type=int,
                         help="The number of samples to generate")
     parser.add_argument("--length", default=100, type=int,
-                        help="The maximum lenght of the samples")
-    parser.add_argument("--batch_size", default=80, type=int,
+                        help="The maximum length of the samples")
+    parser.add_argument("--batch_size", default=100, type=int,
                         help="The batch size to use while generating")
     args = parser.parse_args(*in_args)
     return args
@@ -32,7 +32,7 @@ def filter_bad_samples(samples: List[str]) -> List[str]:
     """
     Filter generations which do not respect the codes
     """
-    samples = [s for s in samples if Separators.SENT_SEP.value in s and Separators.LABEL_SEP in s]
+    samples = [s for s in samples if Separators.SENT_SEP in s and Separators.LABEL_SEP in s]
     return samples
 
 
