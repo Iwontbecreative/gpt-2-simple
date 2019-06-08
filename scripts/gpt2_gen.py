@@ -32,7 +32,7 @@ def filter_bad_samples(samples: List[str]) -> List[str]:
     """
     Filter generations which do not respect the codes
     """
-    samples = [s for s in samples if Separators.SENT_SEP in s and Separators.LABEL_SEP in s]
+    samples = [s for s in samples if Separators.SENT_SEP.value in s and Separators.LABEL_SEP in s]
     return samples
 
 
@@ -60,7 +60,7 @@ def main():
     args = get_args()
     n_samples = args.n_samples
     batch_size = args.batch_size
-    # Avoid cases where `n_samples` is not divisible by batch size
+    # Avoid cases where `n_samples` is not divisible by `batch size`
     if n_samples % batch_size:
         n_samples = batch_size * (n_samples // batch_size)
 
