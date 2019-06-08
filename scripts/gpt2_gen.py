@@ -1,11 +1,19 @@
 import sys
 import argparse
+import logging
 from typing import List
 sys.path.append('.')
 
 import gpt_2_simple as gpt2
 from scripts.shared import Separators
 import pandas as pd
+
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
+    datefmt="%m/%d/%Y %H:%M:%S",
+    level=logging.INFO,
+)
+LOGGER = logging.getLogger(__name__)
 
 
 def get_args(*in_args):
@@ -37,17 +45,30 @@ def filter_bad_samples(samples: List[str]) -> List[str]:
 
 
 def convert_to_tsv(samples: List[str]) -> pd.DataFrame:
+    #FIXME: Check labels are in allowed values?
     split_samples = []
     for s in samples:
         sample_dict = {}
         if Separators.SENT_SEP in s:
-            first_sent, rest = s.split(Separators.SENT_SEP)
+            first_sent, *rest = s.split(Separators.SENT_SEP)
+            if len(rest) > 1:
+                LOGGER.warning("Faulty example: %s", s)
+                continue
+            rest = rest[0]
             sample_dict['sentence1'] = first_sent
-            second_sent, label = rest.split(Separators.LABEL_SEP)
+            second_sent, *label = rest.split(Separators.LABEL_SEP)
+            if len(label) > 1:
+                LOGGER.warning("Faulty example: %s", s)
+                continue
+            label = label[0]
             sample_dict['sentence2'] = second_sent
             sample_dict['label'] = label
         elif Separators.LABEL_SEP in s:
-            first_sent, label = s.split(Separators.LABEL_SEP)
+            first_sent, *label = s.split(Separators.LABEL_SEP)
+            if len(label) > 1:
+                LOGGER.warning("Faulty example: %s", s)
+                continue
+            label = label[0]
             sample_dict['sentence1'] = first_sent
             sample_dict['label'] = label
         else:
@@ -56,7 +77,7 @@ def convert_to_tsv(samples: List[str]) -> pd.DataFrame:
     return pd.DataFrame(split_samples)
 
 
-def main():
+def main() -> None:
     args = get_args()
     n_samples = args.n_samples
     batch_size = args.batch_size
@@ -72,19 +93,19 @@ def main():
     example = ""
     if args.example:
         example = args.example + Separators.SENT_SEP
-    print("Generating samples...")
+    LOGGER.info("Generating samples...")
     samples = gpt2.generate(sess, return_as_list=True,
                             truncate=Separators.EOS, prefix=Separators.BOS + example,
                             nsamples=n_samples, batch_size=batch_size,
                             length=args.length)
     samples = filter_bad_samples(samples)
-    print(f"Generated {len(samples)} correct samples")
-    print("Preview:")
+    LOGGER.info("Generated %s splittable samples", len(samples))
+    LOGGER.info("Preview:")
     for i in samples[:10]:
-        print(i, "\n")
+        LOGGER.info(i + "\n")
     samples_df = convert_to_tsv(samples)
     output_file = args.output_file
-    print(f"Writing samples to {output_file}")
+    LOGGER.info(f"Writing samples to %s", output_file)
     samples_df.to_csv(output_file, sep="\t", index=False)
 
 

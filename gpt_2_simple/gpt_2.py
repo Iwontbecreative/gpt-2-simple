@@ -387,7 +387,6 @@ def generate(
         context = tf.placeholder(tf.int32, [batch_size, None])
 
     CHECKPOINT_DIR = "checkpoint"
-    SAMPLE_DIR = "samples"
 
     checkpoint_path = os.path.join(CHECKPOINT_DIR, run_name)
 
@@ -416,7 +415,8 @@ def generate(
         context_tokens = enc.encode(prefix)
     generated = 0
     gen_texts = []
-    while generated < nsamples:
+    iters = nsamples // batch_size
+    for _ in trange(iters, total=iters, desc="Generating samples"):
         if not prefix:
             out = sess.run(output)
         else:
@@ -444,7 +444,7 @@ def generate(
             if destination_path:
                 f.write("{}\n{}".format(gen_text, sample_delim))
             if not return_as_list and not destination_path:
-                print("{}\n{}".format(gen_text, sample_delim))
+                LOGGER.info("%s\n%s", gen_text, sample_delim)
             gen_texts.append(gen_text)
 
     if destination_path:
