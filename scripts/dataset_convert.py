@@ -61,7 +61,7 @@ if __name__ == "__main__":
     print("Loading...")
     data_file = args.data_file
     if "json" in data_file:
-        data = pd.read_json(data_file)
+        data = pd.read_json(data_file, lines=True)
     else:
         data = pd.read_csv(data_file, sep="\t",
                            error_bad_lines=False, quoting=3, skiprows=0)
