@@ -5,7 +5,7 @@ from typing import List
 sys.path.append('.')
 
 import gpt_2_simple as gpt2
-from scripts.shared import Separators
+from scripts.shared import Separators, Task
 import pandas as pd
 
 logging.basicConfig(
@@ -30,17 +30,21 @@ def get_args(*in_args):
                         help="The number of samples to generate")
     parser.add_argument("--length", default=100, type=int,
                         help="The maximum length of the samples")
+    parser.add_argument("--task", required=True, type=Task,
+                        help="Which task to generate for (for post-processing handling")
     parser.add_argument("--batch_size", default=100, type=int,
                         help="The batch size to use while generating")
     args = parser.parse_args(*in_args)
     return args
 
 
-def filter_bad_samples(samples: List[str]) -> List[str]:
+def filter_bad_samples(samples: List[str], task: Task) -> List[str]:
     """
     Filter generations which do not respect the codes
     """
-    samples = [s for s in samples if Separators.SENT_SEP in s and Separators.LABEL_SEP in s]
+    samples = [s for s in samples if Separators.LABEL_SEP in s]
+    if task in ["mnli", "rte", "snli", "copa"]:
+        samples = [s for s in samples if Separators.SENT_SEP in s and Separators.LABEL_SEP in s]
     return samples
 
 
@@ -53,15 +57,15 @@ def convert_to_tsv(samples: List[str]) -> pd.DataFrame:
     split_samples = []
     for s in samples:
         sample_dict = {}
-        if Separators.SENT_SEP in s:
+        if Separators.SENT_SEP in s and Separators.LABEL_SEP in s:
             first_sent, *rest = s.split(Separators.SENT_SEP)
-            if len(rest) > 1:
+            if len(rest) != 1:
                 LOGGER.warning("Faulty example: %s", s)
                 continue
             rest = rest[0]
             sample_dict['sentence1'] = first_sent
             second_sent, *label = rest.split(Separators.LABEL_SEP)
-            if len(label) > 1:
+            if len(label) != 1:
                 LOGGER.warning("Faulty example: %s", s)
                 continue
             label = label[0]
@@ -69,7 +73,7 @@ def convert_to_tsv(samples: List[str]) -> pd.DataFrame:
             sample_dict['label'] = label
         elif Separators.LABEL_SEP in s:
             first_sent, *label = s.split(Separators.LABEL_SEP)
-            if len(label) > 1:
+            if len(label) != 1:
                 LOGGER.warning("Faulty example: %s", s)
                 continue
             label = label[0]
@@ -105,7 +109,7 @@ def main() -> None:
                             truncate=Separators.EOS, prefix=Separators.BOS + example,
                             nsamples=n_samples, batch_size=batch_size,
                             length=args.length)
-    samples = filter_bad_samples(samples)
+    samples = filter_bad_samples(samples, args.task)
     samples = [s.replace(Separators.BOS, "") for s in samples]
     LOGGER.info("Generated %s splittable samples", len(samples))
     LOGGER.info("Preview:")

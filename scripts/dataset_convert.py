@@ -1,26 +1,13 @@
-
 import pandas as pd
 import argparse
-from enum import Enum
-from scripts.shared import Separators
-
-
-class Task(Enum):
-    MNLI = "mnli"
-    RTE = "rte"
-    COLA = "cola"
-    WIC = "wic"
-    WSC = "wsc"
-
-
-MNLI_PATH = "/scratch/tjf324/data/glue_auto_dl/MNLI/train.tsv"
+from scripts.shared import Separators, Task
 
 
 def get_args(*in_args):
     parser = argparse.ArgumentParser()
 
     # === Required parameters === #
-    parser.add_argument("--data_file", default=MNLI_PATH, required=True,
+    parser.add_argument("--data_file", required=True,
                         type=str, help="tsv to convert")
     parser.add_argument("--output_file", required=True, type=str,
                         help="Where to store the resulting csv")
