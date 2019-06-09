@@ -10,10 +10,6 @@ LABEL_MAP = {
     "copa": [0, 1],
 }
 
-TASK_TRANSFORMS = {
-    "mnli": mnli_fix,
-}
-
 
 def get_args(*in_args):
     parser = argparse.ArgumentParser()
@@ -28,9 +24,29 @@ def get_args(*in_args):
     return args
 
 
-def mnli_fix():
-    pass
+def mnli_fix(df: pd.DataFrame) -> pd.DataFrame:
+    df.rename({"label": "gold_label"}, axis=1, inplace=True)
+    # Create missing columns
+    cols = ["index", "promptID", "pairID", "genre", "sentence1_binary_parse",
+            "sentence2_binary_parse", "sentence1_parse", "sentence2_parse",
+            "sentence1", "sentence2", "label1", "gold_label"]
+    for col in cols:
+        if col not in df:
+            df[col] = "filler"
+    # Re-order columns
+    df = df[cols]
+    return df
 
+
+def cola_fix(df: pd.DataFrame) -> pd.DataFrame:
+    df['genre'] = "gj04"
+    df['star'] = df.label.apply(lambda s: "*" if s else "")
+    return df[['genre', 'label', 'star', 'sentence1']]
+
+
+def rte_fix(df: pd.DataFrame) -> pd.DataFrame:
+    df['index'] = np.arange(len(df))
+    return df[['index', 'sentence1', 'sentence2', 'label']]
 
 
 def main():
@@ -43,7 +59,16 @@ def main():
     print(f"Initially {len(data)} rows")
     data = data[data.label.isin(authorized_labels)]
     print(f"After label cleaning: {len(data)}")
-    data.to_csv(fn, sep="\t", index=False)
+    if task == Task.MNLI:
+        data = mnli_fix(data)
+    elif task == Task.COLA
+        data = cola_fix(data)
+    elif task == Task.RTE:
+        data = rte_fix(data)
+
+    print(f"After dataset specific fixes: {len(data)}")
+    header = task != Task.COLA
+    data.to_csv(fn, sep="\t", index=False, header=header)
 
 
 if __name__ == "__main__":
