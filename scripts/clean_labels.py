@@ -1,16 +1,20 @@
+import argparse
+
 import pandas as pd
 from scripts.shared import Task
 
-LABEL_MAP = {
-    "mnli": ["contradiction", "entailment", "neutral"]
-}
+LABEL_MAP = {"mnli": ["contradiction", "entailment", "neutral"]}
+
 
 def get_args(*in_args):
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--input_file", required=True,
-                        type=str, help="tsv to convert")
-    parser.add_argument("--task", required=True, type=Task, help="The task name")
+    parser.add_argument(
+        "--input_file", required=True, type=str, help="tsv to convert"
+    )
+    parser.add_argument(
+        "--task", required=True, type=Task, help="The task name"
+    )
     args = parser.parse_args(*in_args)
     return args
 
