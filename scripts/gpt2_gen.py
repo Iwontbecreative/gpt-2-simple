@@ -121,6 +121,10 @@ def main() -> None:
     samples_df.drop_duplicates(inplace=True)
     LOGGER.info("After removing duplicates, generated %s samples", len(samples_df))
     output_file = args.output_file
+    LOGGER.info(f"Distribution of labels:")
+    top_distr = samples_df["label"].value_counts(True).head(5)*100
+    LOGGER.info("Label distribution")
+    LOGGER.info(top_distr)
     LOGGER.info("Applying fixes specific to %s", task)
     samples_df = task_fixes(samples_df, task)
 
