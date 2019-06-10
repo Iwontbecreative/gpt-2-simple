@@ -1,5 +1,3 @@
-import argparse
-
 import pandas as pd
 from scripts.shared import Task, LABEL_MAP
 
