@@ -6,6 +6,7 @@ sys.path.append('.')
 
 import gpt_2_simple as gpt2
 from scripts.shared import Separators, Task
+from scripts.task_format_fixes task_fixes
 import pandas as pd
 
 logging.basicConfig(
@@ -107,7 +108,9 @@ def main() -> None:
                             truncate=Separators.EOS, prefix=Separators.BOS + example,
                             nsamples=n_samples, batch_size=batch_size, run_name=run_name,
                             length=args.length)
-    samples = filter_bad_samples(samples, args.task)
+    task = args.task
+    LOGGER.info("Originally had %s", len(samples))
+    samples = filter_bad_samples(samples, task)
     samples = [s.replace(Separators.BOS, "").replace("\n", " ").replace("\t", " ") for s in samples]
     LOGGER.info("Generated %s splittable samples", len(samples))
     LOGGER.info("Preview:")
@@ -115,9 +118,15 @@ def main() -> None:
         LOGGER.info(i + "\n")
     samples_df = convert_to_tsv(samples)
     LOGGER.info("After additional checks, generated %s samples", len(samples_df))
+    samples_df.drop_duplicates(inplace=True)
+    LOGGER.info("After removing duplicates, generated %s samples", len(samples_df))
     output_file = args.output_file
+    LOGGER.info("Applying fixes specific to %s", task)
+    samples_df = task_fixes(samples_df, task)
+
     LOGGER.info(f"Writing samples to %s", output_file)
-    samples_df.to_csv(output_file, sep="\t", index=False)
+    header = task != Task.COLA
+    samples_df.to_csv(output_file, sep="\t", index=False, header=header)
 
 
 if __name__ == "__main__":
