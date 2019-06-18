@@ -18,7 +18,7 @@ def mnli_fix(df: pd.DataFrame) -> pd.DataFrame:
 
 def cola_fix(df: pd.DataFrame) -> pd.DataFrame:
     df['genre'] = "gj04"
-    df['star'] = df.label.apply(lambda s: "" if s else "*")
+    df['star'] = df.label.apply(lambda s: "" if int(s) else "*")
     return df[['genre', 'label', 'star', 'sentence1']]
 
 

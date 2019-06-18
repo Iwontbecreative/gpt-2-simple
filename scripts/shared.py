@@ -1,4 +1,5 @@
 from enum import Enum
+import logging
 
 
 class Separators:
@@ -30,3 +31,9 @@ LABEL_MAP = {
     "sst": ["0", "1"],
     "mrpc": ["0", "1"],
 }
+
+logging_config = dict(
+    format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
+    datefmt="%m/%d/%Y %H:%M:%S",
+    level=logging.INFO,
+)

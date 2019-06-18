@@ -1,14 +1,10 @@
 import logging
 import argparse
-from scripts.shared import ModelNames
+from scripts.shared import ModelNames, logging_config
 
 import gpt_2_simple as gpt2
 
-logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
-    datefmt="%m/%d/%Y %H:%M:%S",
-    level=logging.INFO,
-)
+logging.basicConfig(**logging_config)
 LOGGER = logging.getLogger(__name__)
 
 
@@ -59,6 +55,12 @@ def get_args(*in_args):
         type=int,
         help="The number of steps to finetune for (-1 infinite)",
     )
+    parser.add_argument(
+        "--max_checkpoints",
+        type=int,
+        default=1,
+        help="Max number of cjeckpoints to keep"
+    )
     args = parser.parse_args(*in_args)
     return args
 
@@ -79,6 +81,7 @@ def main():
         save_every=args.save_every,
         sample_length=args.length,
         batch_size=args.batch_size,
+        max_checkpoints=args.max_checkpoints,
         steps=args.steps,
     )
     LOGGER.info("Final model samples")

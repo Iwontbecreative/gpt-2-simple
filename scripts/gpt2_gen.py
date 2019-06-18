@@ -6,15 +6,11 @@ from typing import List
 sys.path.append(".")
 
 import gpt_2_simple as gpt2
-from scripts.shared import Separators, Task
+from scripts.shared import Separators, Task, logging_config
 from scripts.task_format_fixes import task_fixes
 import pandas as pd
 
-logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
-    datefmt="%m/%d/%Y %H:%M:%S",
-    level=logging.INFO,
-)
+logging.basicConfig(**logging_config)
 LOGGER = logging.getLogger(__name__)
 
 
