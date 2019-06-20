@@ -149,6 +149,7 @@ def main() -> None:
         sess,
         return_as_list=True,
         temperature=args.temperature,
+        top_p=args.top_p,
         truncate=Separators.EOS,
         prefix=Separators.BOS + example,
         nsamples=n_samples,
