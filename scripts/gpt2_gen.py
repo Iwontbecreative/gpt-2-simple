@@ -55,6 +55,18 @@ def get_args(*in_args):
         help="Which task to generate for (for post-processing handling",
     )
     parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.7,
+        help="Temperature to use when sampling",
+    )
+    parser.add_argument(
+        '--top_p',
+        type=float,
+        default=0,
+        help="Top_p to use when sampling"
+    )
+    parser.add_argument(
         "--batch_size",
         default=100,
         type=int,
@@ -136,6 +148,7 @@ def main() -> None:
     samples = gpt2.generate(
         sess,
         return_as_list=True,
+        temperature=args.temperature,
         truncate=Separators.EOS,
         prefix=Separators.BOS + example,
         nsamples=n_samples,
