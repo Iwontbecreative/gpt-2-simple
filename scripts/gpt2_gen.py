@@ -175,8 +175,7 @@ def main() -> None:
         samples = []
         with open(conditional_gen_file, "r") as infile:
             for line in tqdm.tqdm(infile, desc="Generating samples for example"):
-                line = line.split(" | ")[0]
-                example = Separators.BOS + line + Separators.EOS
+                example = line.split(" | ")[0]
                 samples.extend(gpt2.generate(
                     sess,
                     return_as_list=True,
@@ -195,6 +194,7 @@ def main() -> None:
     task = args.task
     LOGGER.info("Originally had %s", len(samples))
     samples = filter_bad_samples(samples, task)
+    LOGGER.info("\n".join(samples[:5]))
     samples = [
         s.replace(Separators.BOS, "").replace("\n", " ").replace("\t", " ")
         for s in samples
