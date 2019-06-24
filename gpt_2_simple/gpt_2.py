@@ -6,6 +6,7 @@ import sys
 import shutil
 import re
 import logging
+from typing import Iterable, Optional, Union
 from tqdm import tqdm, trange
 import numpy as np
 import tensorflow as tf
@@ -33,7 +34,7 @@ logging.basicConfig(
 LOGGER = logging.getLogger(__name__)
 
 
-def download_gpt2(model_name="117M"):
+def download_gpt2(model_name: str = "117M"):
     """Downloads the GPT-2 model into the current directory
     from Google Cloud Storage.
 
@@ -74,7 +75,7 @@ def download_gpt2(model_name="117M"):
                     pbar.update(chunk_size)
 
 
-def start_tf_sess(threads=-1):
+def start_tf_sess(threads: int = -1):
     """
     Returns a tf.Session w/ config
     """
@@ -93,23 +94,23 @@ def start_tf_sess(threads=-1):
 def finetune(
     sess,
     dataset,
-    steps=-1,
-    model_name="117M",
+    steps: int = -1,
+    model_name: str ="117M",
     combine=50000,
-    batch_size=1,
-    learning_rate=0.0001,
-    accumulate_gradients=5,
-    restore_from="latest",
-    run_name="run1",
-    sample_every=100,
-    sample_length=1023,
-    sample_num=1,
-    save_every=1000,
-    print_every=1,
-    max_checkpoints=1,
-    use_memory_saving_gradients=False,
-    only_train_transformer_layers=False,
-    overwrite=False,
+    batch_size: int = 1,
+    learning_rate: float = 0.0001,
+    accumulate_gradients: int = 5,
+    restore_from: str = "latest",
+    run_name: str = "run1",
+    sample_every: int = 100,
+    sample_length: int = 1023,
+    sample_num: int = 1,
+    save_every: int = 1000,
+    print_every: int = 1,
+    max_checkpoints: int = 1,
+    use_memory_saving_gradients: bool = False,
+    only_train_transformer_layers: bool = False,
+    overwrite: bool = False,
 ):
     """Finetunes the model on the given dataset.
 
@@ -354,28 +355,28 @@ def load_gpt2(sess, run_name="run1"):
     saver.restore(sess, ckpt)
 
 
+
 def generate(
     sess,
-    run_name="run1",
-    return_as_list=False,
+    run_name: str = "run1",
+    return_as_list: bool = False,
     truncate=None,
     destination_path=None,
-    sample_delim="=" * 20 + "\n",
-    prefix=None,
+    sample_delim: str = "=" * 20 + "\n",
+    prefixes: Optional[Union[Iterable[str], str]] = None,
     seed=None,
-    nsamples=1,
-    batch_size=1,
-    length=1023,
-    temperature=0.7,
-    top_k=0,
-    top_p=0.0,
-    include_prefix=True,
+    nsamples: int = 1,
+    batch_size: int = 1,
+    length: int = 1023,
+    temperature: float = 0.7,
+    top_k: int = 0,
+    top_p: float = 0.0,
+    include_prefix: bool = True,
 ):
-    """Generates text from a model loaded into memory.
-
+    """
+    Generates text from a model loaded into memory.
     Adapted from https://github.com/openai/gpt-2/blob/master/src/interactive_conditional_samples.py
     """
-
     if batch_size is None:
         batch_size = 1
     assert nsamples % batch_size == 0
@@ -383,7 +384,7 @@ def generate(
     if nsamples == 1:
         sample_delim = ""
 
-    if prefix:
+    if prefixes:
         context = tf.placeholder(tf.int32, [batch_size, None])
 
     CHECKPOINT_DIR = "checkpoint"
@@ -401,8 +402,8 @@ def generate(
     output = sample.sample_sequence(
         hparams=hparams,
         length=length,
-        start_token=enc.encoder["<|endoftext|>"] if not prefix else None,
-        context=context if prefix else None,
+        start_token=enc.encoder["<|endoftext|>"] if not prefixes else None,
+        context=context if prefixes else None,
         batch_size=batch_size,
         temperature=temperature,
         top_k=top_k,
@@ -411,13 +412,15 @@ def generate(
 
     if destination_path:
         f = open(destination_path, "w")
-    if prefix:
-        context_tokens = enc.encode(prefix)
+
+
+    if prefixes:
+        context_tokens = enc.encode(prefixes)
     generated = 0
     gen_texts = []
     iters = nsamples // batch_size
     for _ in trange(iters, total=iters, desc="Generating samples"):
-        if not prefix:
+        if not prefixes:
             out = sess.run(output)
         else:
             out = sess.run(
@@ -426,12 +429,12 @@ def generate(
         for i in range(batch_size):
             generated += 1
             gen_text = enc.decode(out[i])
-            if prefix:
-                gen_text = prefix[0] + gen_text
+            if prefixes:
+                gen_text = prefixes[0] + gen_text
             if truncate:
                 truncate_esc = re.escape(truncate)
-                if prefix and not include_prefix:
-                    prefix_esc = re.escape(prefix)
+                if prefixes and not include_prefix:
+                    prefix_esc = re.escape(prefixes)
                     pattern = "(?:{})(.*?)(?:{})".format(
                         prefix_esc, truncate_esc
                     )

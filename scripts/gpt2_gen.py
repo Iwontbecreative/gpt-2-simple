@@ -163,7 +163,7 @@ def main() -> None:
             temperature=args.temperature,
             top_p=args.top_p,
             truncate=Separators.EOS,
-            prefix=Separators.BOS + example,
+            prefixes=Separators.BOS + example,
             nsamples=n_samples,
             batch_size=batch_size,
             run_name=run_name,
@@ -176,13 +176,14 @@ def main() -> None:
         with open(conditional_gen_file, "r") as infile:
             for line in tqdm.tqdm(infile, desc="Generating samples for example"):
                 example = line.split(" | ")[0]
+                # Really inefficient because reloads at every time...
                 samples.extend(gpt2.generate(
                     sess,
                     return_as_list=True,
                     temperature=args.temperature,
                     top_p=args.top_p,
                     truncate=Separators.EOS,
-                    prefix=Separators.BOS + example,
+                    prefixes=Separators.BOS + example,
                     nsamples=n_samples,
                     batch_size=batch_size,
                     run_name=run_name,

@@ -1,3 +1,6 @@
+import sys
+sys.path.append(".")
+
 import logging
 import argparse
 from scripts.shared import ModelNames, logging_config

@@ -1,9 +1,4 @@
-import argparse
-import json
-import os
-import numpy as np
 import tensorflow as tf
-import time
 
 
 class AccumulatingOptimizer(object):
@@ -31,6 +26,6 @@ class AccumulatingOptimizer(object):
             return tf.no_op()
 
     def apply_gradients(self):
-        grads = [(g,v) for (v,g) in self.accum_vars.items()]
+        grads = [(g, v) for (v, g) in self.accum_vars.items()]
         with tf.control_dependencies([self.opt.apply_gradients(grads)]):
             return self.total_loss / self.count_loss
