@@ -1,9 +1,12 @@
 import sys
 import argparse
 import logging
+import os
 from typing import List
 
 sys.path.append(".")
+
+import tqdm
 
 import gpt_2_simple as gpt2
 from scripts.shared import Separators, Task, logging_config
@@ -23,6 +26,12 @@ def get_args(*in_args):
         default=None,
         type=str,
         help="Run name to use for generation",
+    )
+    parser.add_argument(
+        "--conditional_gen_file",
+        default=None,
+        type=str,
+        help="If given, will perform conditional generation based on examples of the file"
     )
     parser.add_argument(
         "--output_file",
@@ -141,22 +150,48 @@ def main() -> None:
     sess = gpt2.start_tf_sess()
     run_name = args.run_name
     gpt2.load_gpt2(sess, args.run_name)
-    example = ""
-    if args.example:
-        example = args.example + Separators.SENT_SEP
-    LOGGER.info("Generating samples...")
-    samples = gpt2.generate(
-        sess,
-        return_as_list=True,
-        temperature=args.temperature,
-        top_p=args.top_p,
-        truncate=Separators.EOS,
-        prefix=Separators.BOS + example,
-        nsamples=n_samples,
-        batch_size=batch_size,
-        run_name=run_name,
-        length=args.length,
-    )
+
+    conditional_gen_file = args.conditional_gen_file
+    if conditional_gen_file is None:
+        example = ""
+        if args.example:
+            example = args.example + Separators.SENT_SEP
+        LOGGER.info("Generating samples...")
+        samples = gpt2.generate(
+            sess,
+            return_as_list=True,
+            temperature=args.temperature,
+            top_p=args.top_p,
+            truncate=Separators.EOS,
+            prefix=Separators.BOS + example,
+            nsamples=n_samples,
+            batch_size=batch_size,
+            run_name=run_name,
+            length=args.length,
+        )
+    else:
+        LOGGER.info("Generating conditional samples...")
+        assert os.path.exists(conditional_gen_file)
+        samples = []
+        with open(conditional_gen_file, "r") as infile:
+            for line in tqdm.tqdm(infile, desc="Generating samples for example"):
+                line = line.split(" | ")[0]
+                example = Separators.BOS + line + Separators.EOS
+                samples.extend(gpt2.generate(
+                    sess,
+                    return_as_list=True,
+                    temperature=args.temperature,
+                    top_p=args.top_p,
+                    truncate=Separators.EOS,
+                    prefix=Separators.BOS + example,
+                    nsamples=n_samples,
+                    batch_size=batch_size,
+                    run_name=run_name,
+                    length=args.length,
+                ))
+
+
+
     task = args.task
     LOGGER.info("Originally had %s", len(samples))
     samples = filter_bad_samples(samples, task)
