@@ -8,17 +8,22 @@
 
 CODE_PATH=/scratch/tjf324/gpt-2-simple
 
-PATH=/scratch/tjf324/anaconda/envs/gpt2/bin:${CODE_PATH}:/scratch/tjf324/anaconda3/bin:$PATH
+PATH=/scratch/tjf324/anaconda/envs/gpt2/bin:$PATH
 PYTHONPATH=${CODE_PATH}
 
 # Log what we're running and where.
 echo $SLURM_JOBID - `hostname` - $JIANT_OVERRIDES >> ~/gpt2_machine_assignments.txt
 
+
 source activate gpt2
 # Run.
 cd ${CODE_PATH}
 
+TASK=mnli
+LENGTH=100
+N_SAMPLES=10
+SEED=`shuf -i1000-9999 -n1`
+COND_GEN=/scratch/tjf324/data/converted_glue/ultra_small_mnli.csv
 
-
-python scripts/gpt2_gen.py --output_file mnli_samples.tsv --n_samples 20000 --length 100 --batch_size 200
+python scripts/gpt2_gen.py --output_file ${TASK}_conditional_samples_${SEED}.tsv --n_samples ${N_SAMPLES} --length ${LENGTH} --batch_size 10 --run_name ${TASK} --task ${TASK}  --conditional_gen_file ${COND_GEN}
 echo DONE
