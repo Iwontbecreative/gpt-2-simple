@@ -173,7 +173,9 @@ def main() -> None:
         LOGGER.info("Generating conditional samples...")
         assert os.path.exists(conditional_gen_file)
         with open(conditional_gen_file, "r") as infile:
-            all_examples = [Separators.BOS + l.split(Separators.SENT_SEP)[0] for l in infile.readlines()]
+            all_examples = [Separators.BOS + l.split(Separators.SENT_SEP)[0] + Separators.SENT_SEP
+                            for l in infile.readlines()]
+            LOGGER.info("\n".join(all_examples[:3]))
             n_samples = len(all_examples) * batch_size
             LOGGER.info("Resetting batch size to %s match number of examples", n_samples)
             samples = gpt2.generate(

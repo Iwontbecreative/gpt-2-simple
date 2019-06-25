@@ -413,12 +413,13 @@ def generate(
     if destination_path:
         f = open(destination_path, "w")
 
-
     if isinstance(prefixes, str):
         context_tokens = enc.encode(prefixes)
     generated = 0
     gen_texts = []
     iters = nsamples // batch_size
+    LOGGER.info(iters)
+    LOGGER.info(batch_size)
     for i in trange(iters, total=iters, desc="Generating samples"):
         if not prefixes:
             out = sess.run(output)
@@ -428,6 +429,7 @@ def generate(
                 output, feed_dict={context: batch_size * [context_tokens]}
             )
         elif isinstance(prefixes, list):
+            LOGGER.info(prefixes[i])
             context_tokens = enc.encode(prefixes[i])
             out = sess.run(
                 output, feed_dict={context: batch_size * [context_tokens]}
