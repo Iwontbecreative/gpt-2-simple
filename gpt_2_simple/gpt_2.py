@@ -428,7 +428,7 @@ def generate(
                 output, feed_dict={context: batch_size * [context_tokens]}
             )
         elif isinstance(prefixes, list):
-            context_tokens = enc.encode(prefixes[j])
+            context_tokens = enc.encode(prefixes[i])
             out = sess.run(
                 output, feed_dict={context: batch_size * [context_tokens]}
             )
