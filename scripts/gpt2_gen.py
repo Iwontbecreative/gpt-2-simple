@@ -172,26 +172,22 @@ def main() -> None:
     else:
         LOGGER.info("Generating conditional samples...")
         assert os.path.exists(conditional_gen_file)
-        samples = []
         with open(conditional_gen_file, "r") as infile:
-            for line in tqdm.tqdm(infile, desc="Generating samples for example"):
-                example = line.split(" | ")[0]
-                # Really inefficient because reloads at every time...
-                samples.extend(gpt2.generate(
-                    sess,
-                    return_as_list=True,
-                    temperature=args.temperature,
-                    top_p=args.top_p,
-                    truncate=Separators.EOS,
-                    prefixes=Separators.BOS + example,
-                    nsamples=n_samples,
-                    batch_size=batch_size,
-                    run_name=run_name,
-                    length=args.length,
-                ))
-
-
-
+            all_examples = [Separators.BOS + l.split(Separators.SENT_SEP)[0] for l in infile.readlines()]
+            n_samples = len(all_examples) * batch_size
+            LOGGER.info("Resetting batch size to %s match number of examples", n_samples)
+            samples = gpt2.generate(
+                sess,
+                return_as_list=True,
+                temperature=args.temperature,
+                top_p=args.top_p,
+                truncate=Separators.EOS,
+                prefixes=all_examples,
+                nsamples=n_samples,
+                batch_size=batch_size,
+                run_name=run_name,
+                length=args.length,
+            )
     task = args.task
     LOGGER.info("Originally had %s", len(samples))
     samples = filter_bad_samples(samples, task)
@@ -202,8 +198,7 @@ def main() -> None:
     ]
     LOGGER.info("Generated %s splittable samples", len(samples))
     LOGGER.info("Preview:")
-    for i in samples[:10]:
-        LOGGER.info(i + "\n")
+    LOGGER.info("\n".join(samples[:10]))
     samples_df = convert_to_tsv(samples)
     LOGGER.info(
         "After additional checks, generated %s samples", len(samples_df)

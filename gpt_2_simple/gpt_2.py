@@ -33,6 +33,12 @@ logging.basicConfig(
 )
 LOGGER = logging.getLogger(__name__)
 
+def maketree(path):
+    try:
+        os.makedirs(path)
+    except:
+        pass
+
 
 def download_gpt2(model_name: str = "117M"):
     """Downloads the GPT-2 model into the current directory
@@ -122,12 +128,6 @@ def finetune(
     SAMPLE_DIR = "samples"
 
     checkpoint_path = os.path.join(CHECKPOINT_DIR, run_name)
-
-    def maketree(path):
-        try:
-            os.makedirs(path)
-        except:
-            pass
 
     maketree(checkpoint_path)
     files = [f for f in os.listdir(checkpoint_path)]
@@ -414,21 +414,29 @@ def generate(
         f = open(destination_path, "w")
 
 
-    if prefixes:
+    if isinstance(prefixes, str):
         context_tokens = enc.encode(prefixes)
     generated = 0
     gen_texts = []
     iters = nsamples // batch_size
-    for _ in trange(iters, total=iters, desc="Generating samples"):
+    for i in trange(iters, total=iters, desc="Generating samples"):
         if not prefixes:
             out = sess.run(output)
-        else:
+        # Always want to encode the same sentence
+        elif isinstance(prefixes, str):
             out = sess.run(
                 output, feed_dict={context: batch_size * [context_tokens]}
             )
-        for i in range(batch_size):
+        elif isinstance(prefixes, list):
+            context_tokens = enc.encode(prefixes[j])
+            out = sess.run(
+                output, feed_dict={context: batch_size * [context_tokens]}
+            )
+        else:
+            raise NotImplementedError('Prefixes has to be one of [None, List, str]')
+        for j in range(batch_size):
             generated += 1
-            gen_text = enc.decode(out[i])
+            gen_text = enc.decode(out[j])
             if prefixes:
                 gen_text = prefixes[0] + gen_text
             if truncate:
@@ -440,7 +448,6 @@ def generate(
                     )
                 else:
                     pattern = "(.*?)(?:{})".format(truncate_esc)
-
                 trunc_text = re.search(pattern, gen_text, re.S)
                 if trunc_text:
                     gen_text = trunc_text.group(1)
