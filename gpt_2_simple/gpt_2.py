@@ -23,24 +23,21 @@ except:
     pass
 
 from gpt_2_simple.src import model, sample, encoder, memory_saving_gradients
+from gpt_2_simple.src.shared import logging_config, ModelNames, CHECKPOINT_DIR, SAMPLE_DIR
 from gpt_2_simple.src.load_dataset import load_dataset, Sampler
 from gpt_2_simple.src.accumulate import AccumulatingOptimizer
 
-logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
-    datefmt="%m/%d/%Y %H:%M:%S",
-    level=logging.INFO,
-)
+logging.basicConfig(**logging_config)
 LOGGER = logging.getLogger(__name__)
 
 def maketree(path):
     try:
         os.makedirs(path)
-    except:
+    except OSError:
         pass
 
 
-def download_gpt2(model_name: str = "117M"):
+def download_gpt2(model_name: str = ModelNames.BASE_117):
     """Downloads the GPT-2 model into the current directory
     from Google Cloud Storage.
 
@@ -101,7 +98,7 @@ def finetune(
     sess,
     dataset,
     steps: int = -1,
-    model_name: str ="117M",
+    model_name: str = "117M",
     combine=50000,
     batch_size: int = 1,
     learning_rate: float = 0.0001,
@@ -123,9 +120,6 @@ def finetune(
     Adapted from https://github.com/nshepperd/gpt-2/blob/finetuning/train.py.
     See that file for parameter definitions.
     """
-
-    CHECKPOINT_DIR = "checkpoint"
-    SAMPLE_DIR = "samples"
 
     checkpoint_path = os.path.join(CHECKPOINT_DIR, run_name)
 
@@ -154,7 +148,7 @@ def finetune(
             "Can't get samples longer than window size: %s" % hparams.n_ctx
         )
 
-    if model_name != "117M":
+    if model_name != ModelNames.BASE_117:
         use_memory_saving_gradients = True
         only_train_transformer_layers = True
         accumulate_gradients = 1
@@ -336,8 +330,6 @@ def load_gpt2(sess, run_name="run1"):
     """Loads the model checkpoint into a TensorFlow session
     for repeated predictions.
     """
-    CHECKPOINT_DIR = "checkpoint"
-
     checkpoint_path = os.path.join(CHECKPOINT_DIR, run_name)
 
     hparams = model.default_hparams()
@@ -386,8 +378,6 @@ def generate(
 
     if prefixes:
         context = tf.placeholder(tf.int32, [batch_size, None])
-
-    CHECKPOINT_DIR = "checkpoint"
 
     checkpoint_path = os.path.join(CHECKPOINT_DIR, run_name)
 

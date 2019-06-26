@@ -1,6 +1,11 @@
 from enum import Enum
 import logging
 
+logging_config = dict(
+    format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
+    datefmt="%m/%d/%Y %H:%M:%S",
+    level=logging.INFO,
+)
 
 class Separators:
     LABEL_SEP = " || "
@@ -32,8 +37,6 @@ LABEL_MAP = {
     "mrpc": ["0", "1"],
 }
 
-logging_config = dict(
-    format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
-    datefmt="%m/%d/%Y %H:%M:%S",
-    level=logging.INFO,
-)
+
+CHECKPOINT_DIR = "checkpoint"
+SAMPLE_DIR = "samples"

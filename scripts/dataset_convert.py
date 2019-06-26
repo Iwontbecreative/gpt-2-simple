@@ -1,6 +1,6 @@
 import pandas as pd
 import argparse
-from scripts.shared import Separators, Task
+from gpt_2_simple.src.shared import Separators, Task
 
 
 def get_args(*in_args):

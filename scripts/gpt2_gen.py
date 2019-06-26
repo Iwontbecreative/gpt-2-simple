@@ -6,10 +6,8 @@ from typing import List
 
 sys.path.append(".")
 
-import tqdm
-
 import gpt_2_simple as gpt2
-from scripts.shared import Separators, Task, logging_config
+from gpt_2_simple.src.shared import Separators, Task, logging_config
 from scripts.task_format_fixes import task_fixes
 import pandas as pd
 

@@ -3,7 +3,7 @@ sys.path.append(".")
 
 import logging
 import argparse
-from scripts.shared import ModelNames, logging_config
+from gpt_2_simple.src.shared import ModelNames, logging_config
 
 import gpt_2_simple as gpt2
 

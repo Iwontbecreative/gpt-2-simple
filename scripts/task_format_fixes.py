@@ -1,5 +1,5 @@
 import pandas as pd
-from scripts.shared import Task, LABEL_MAP
+from gpt_2_simple.src.shared import Task, LABEL_MAP
 
 
 def mnli_fix(df: pd.DataFrame) -> pd.DataFrame:
