@@ -30,7 +30,8 @@ from gpt_2_simple.src.accumulate import AccumulatingOptimizer
 logging.basicConfig(**logging_config)
 LOGGER = logging.getLogger(__name__)
 
-def maketree(path):
+
+def maketree(path: str):
     try:
         os.makedirs(path)
     except OSError:
@@ -98,7 +99,7 @@ def finetune(
     sess,
     dataset,
     steps: int = -1,
-    model_name: str = "117M",
+    model_name: str = ModelNames.BASE_117,
     combine=50000,
     batch_size: int = 1,
     learning_rate: float = 0.0001,
@@ -574,7 +575,7 @@ def copy_file_from_gdrive(file_path):
     shutil.copyfile("/content/drive/My Drive/" + file_path, file_path)
 
 
-def is_gpt2_downloaded(model_name="117M"):
+def is_gpt2_downloaded(model_name=ModelNames.BASE_117):
     """Checks if the original model + associated files are present in folder."""
 
     for filename in [
@@ -612,7 +613,7 @@ def encode_csv(
 
 
 def encode_dataset(
-    file_path, out_path="text_encoded.npz", model_name="117M", combine=50000
+    file_path, out_path="text_encoded.npz", model_name=ModelNames.BASE_117, combine=50000
 ):
     """Preencodes a text document into chunks and compresses it,
     saving time when generated.
@@ -652,7 +653,7 @@ def cmd():
         "--model_name",
         help="[finetune] Name of the GPT-2 model to finetune",
         nargs="?",
-        default="117M",
+        default=ModelNames.BASE_117,
     )
     parser.add_argument(
         "--dataset",
