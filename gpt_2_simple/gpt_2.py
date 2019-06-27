@@ -409,8 +409,6 @@ def generate(
     generated = 0
     gen_texts = []
     iters = nsamples // batch_size
-    LOGGER.info(iters)
-    LOGGER.info(batch_size)
     for i in trange(iters, total=iters, desc="Generating samples"):
         if not prefixes:
             out = sess.run(output)
@@ -420,7 +418,6 @@ def generate(
                 output, feed_dict={context: batch_size * [context_tokens]}
             )
         elif isinstance(prefixes, list):
-            LOGGER.info(prefixes[i])
             context_tokens = enc.encode(prefixes[i])
             out = sess.run(
                 output, feed_dict={context: batch_size * [context_tokens]}
@@ -430,8 +427,6 @@ def generate(
         for j in range(batch_size):
             generated += 1
             gen_text = enc.decode(out[j])
-            if prefixes:
-                gen_text = prefixes[0] + gen_text
             if truncate:
                 truncate_esc = re.escape(truncate)
                 if prefixes and not include_prefix:

@@ -4,7 +4,7 @@ import logging
 import os
 from typing import List
 
-sys.path.append(".")
+sys.path.append("")
 
 import gpt_2_simple as gpt2
 from gpt_2_simple.src.shared import Separators, Task, logging_config
@@ -173,9 +173,8 @@ def main() -> None:
         with open(conditional_gen_file, "r") as infile:
             all_examples = [Separators.BOS + l.split(Separators.SENT_SEP)[0] + Separators.SENT_SEP
                             for l in infile.readlines()]
-            LOGGER.info("\n".join(all_examples[:3]))
             n_samples = len(all_examples) * batch_size
-            LOGGER.info("Resetting batch size to %s match number of examples", n_samples)
+            LOGGER.info("Resetting n_samples to %s to match number of examples", n_samples)
             samples = gpt2.generate(
                 sess,
                 return_as_list=True,
@@ -188,12 +187,13 @@ def main() -> None:
                 run_name=run_name,
                 length=args.length,
             )
+
     task = args.task
     LOGGER.info("Originally had %s", len(samples))
     samples = filter_bad_samples(samples, task)
-    LOGGER.info("\n".join(samples[:5]))
+    # FIXME: Why is it |startoftext|> instead of <|startoftext|>
     samples = [
-        s.replace(Separators.BOS, "").replace("\n", " ").replace("\t", " ")
+        s.replace(Separators.BOS, "").replace(Separators.BOS[1:]).replace("\n", " ").replace("\t", " ")
         for s in samples
     ]
     LOGGER.info("Generated %s splittable samples", len(samples))

@@ -7,6 +7,7 @@ logging_config = dict(
     level=logging.INFO,
 )
 
+
 class Separators:
     LABEL_SEP = " || "
     SENT_SEP = " | "
