@@ -193,7 +193,7 @@ def main() -> None:
     samples = filter_bad_samples(samples, task)
     # FIXME: Why is it |startoftext|> instead of <|startoftext|>
     samples = [
-        s.replace(Separators.BOS, "").replace(Separators.BOS[1:]).replace("\n", " ").replace("\t", " ")
+        s.replace(Separators.BOS, "").replace(Separators.BOS[1:], "").replace("\n", " ").replace("\t", " ")
         for s in samples
     ]
     LOGGER.info("Generated %s splittable samples", len(samples))
